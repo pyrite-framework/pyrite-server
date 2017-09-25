@@ -3,6 +3,7 @@
   "description": "Pyrite",
   "version": "0.0.1",
   "author": "Fabio Garcia",
+  "main": "dist/server.js",
   "scripts": {
     "start": "nodemon dist/server.js",
     "grunt": "grunt"
