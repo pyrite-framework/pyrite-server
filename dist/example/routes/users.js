@@ -9,7 +9,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const decorators_1 = require("../../src/decorators");
+const src_1 = require("../../src");
 const users = [];
 let index = 0;
 let Users = class Users {
@@ -24,44 +24,44 @@ let Users = class Users {
     getUser(id) {
         const user = users.find((user) => user.id === id);
         if (!user)
-            throw decorators_1.Exception(404, 'not_found');
+            throw src_1.Exception(404, "not_found");
         return user;
     }
     updateUser(id, user) {
         const foundUser = users.find((user) => user.id === id);
         if (!user)
-            throw decorators_1.Exception(404, 'not_found');
+            throw src_1.Exception(404, "not_found");
         Object.assign(foundUser, user);
         return user;
     }
     removeUser(id) {
         const indexUser = users.findIndex((user) => user.id === id);
         if (indexUser === -1)
-            throw decorators_1.Exception(404, 'not_found');
+            throw src_1.Exception(404, "not_found");
         users.splice(indexUser, 1);
         return true;
     }
 };
 __decorate([
-    decorators_1.Get('/'),
-    __param(0, decorators_1.Query('name'))
+    src_1.Get("/"),
+    __param(0, src_1.Query("name"))
 ], Users.prototype, "getUsers", null);
 __decorate([
-    decorators_1.Post('/'),
-    __param(0, decorators_1.Body)
+    src_1.Post("/"),
+    __param(0, src_1.Body)
 ], Users.prototype, "createUser", null);
 __decorate([
-    decorators_1.Get('/:id', Number),
-    __param(0, decorators_1.Params('id'))
+    src_1.Get("/:id", Number),
+    __param(0, src_1.Params("id"))
 ], Users.prototype, "getUser", null);
 __decorate([
-    decorators_1.Put('/:id', Number),
-    __param(0, decorators_1.Params('id')), __param(1, decorators_1.Body)
+    src_1.Put("/:id", Number),
+    __param(0, src_1.Params("id")), __param(1, src_1.Body)
 ], Users.prototype, "updateUser", null);
 __decorate([
-    decorators_1.Delete('/:id', Number),
-    __param(0, decorators_1.Params('id'))
+    src_1.Delete("/:id", Number),
+    __param(0, src_1.Params("id"))
 ], Users.prototype, "removeUser", null);
 Users = __decorate([
-    decorators_1.Route('/users')
+    src_1.Route("/users")
 ], Users);

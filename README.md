@@ -7,5 +7,5 @@ sudo npm install -g nodemon
 npm install
 
 npm run watch
-npm start // this in other terminal
+npm start #this in other terminal
 ```

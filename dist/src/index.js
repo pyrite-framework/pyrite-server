@@ -4,32 +4,52 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const express = require("express");
 const fs = require("fs");
+const Actions = require("./decorators/actions");
+const General = require("./decorators/general");
+const Parameters = require("./decorators/parameters");
+;
+;
 class Server {
     constructor(params) {
+        this.params = params;
         Server.app = express();
         Server.app.use(bodyParser.json());
         Server.app.use(cookieParser());
-        this.port = params.port;
-        this.routesPath = params.routes;
         if (params.config)
             this.config(params.config);
     }
-    __loadRoutes() {
-        fs.readdirSync(this.routesPath).forEach((file) => {
-            require(this.routesPath + '/' + file);
+    loadRoutes() {
+        fs.readdirSync(this.params.routes).forEach((file) => {
+            require(`${this.params.routes}/${file}`);
         });
     }
-    config(cb) {
-        this.__config = cb.bind(this, Server.app);
+    configCallback() { }
+    config(callbackConfig) {
+        this.configCallback = callbackConfig.bind(this, Server.app);
         return this;
     }
-    listen(cb) {
-        this.__loadRoutes();
-        if (this.__config)
-            this.__config();
+    listen(callbackListen) {
+        this.loadRoutes();
+        this.configCallback();
         setTimeout(() => {
-            Server.app.listen(this.port, cb.bind({}, this.port));
+            Server.app.listen(this.params.port, callbackListen);
         });
     }
 }
 exports.Server = Server;
+exports.Get = Actions.Get;
+exports.Post = Actions.Post;
+exports.Put = Actions.Put;
+exports.Delete = Actions.Delete;
+exports.Head = Actions.Head;
+exports.Route = General.Route;
+exports.Status = General.Status;
+exports.Exception = General.Exception;
+exports.Before = General.Before;
+exports.After = General.After;
+exports.Headers = Parameters.Headers;
+exports.Cookies = Parameters.Cookies;
+exports.Session = Parameters.Session;
+exports.Query = Parameters.Query;
+exports.Params = Parameters.Params;
+exports.Body = Parameters.Body;

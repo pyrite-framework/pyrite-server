@@ -1,4 +1,4 @@
-import { Route, Get, Post, Put, Delete, Body, Params, Query, Exception } from '../../src/decorators';
+import { Route, Get, Post, Put, Delete, Body, Params, Query, Exception } from "../../src";
 
 interface UserModel {
   id: number;
@@ -10,14 +10,14 @@ const users: Array<UserModel> = [];
 
 let index = 0;
 
-@Route('/users')
+@Route("/users")
 class Users {
-  @Get('/')
-  getUsers(@Query('name') name): Array<UserModel> {
+  @Get("/")
+  getUsers(@Query("name") name): Array<UserModel> {
     return users.filter((user) => !name || user.name === name);
   }
 
-  @Post('/')
+  @Post("/")
   createUser(@Body user: UserModel): UserModel {
     user.id = index++;
 
@@ -26,28 +26,28 @@ class Users {
     return user;
   }
 
-  @Get('/:id', Number)
-  getUser(@Params('id') id): UserModel {
+  @Get("/:id", Number)
+  getUser(@Params("id") id): UserModel {
     const user = users.find((user) => user.id === id);
-    if (!user) throw Exception(404, 'not_found');
+    if (!user) throw Exception(404, "not_found");
     
     return user;
   }
 
-  @Put('/:id', Number)
-  updateUser(@Params('id') id, @Body user: UserModel): UserModel {
+  @Put("/:id", Number)
+  updateUser(@Params("id") id, @Body user: UserModel): UserModel {
     const foundUser = users.find((user) => user.id === id);
-    if (!user) throw Exception(404, 'not_found');
+    if (!user) throw Exception(404, "not_found");
 
     Object.assign(foundUser, user);
 
     return user;
   }
 
-  @Delete('/:id', Number)
-  removeUser(@Params('id') id) {
+  @Delete("/:id", Number)
+  removeUser(@Params("id") id) {
     const indexUser = users.findIndex((user) => user.id === id);
-    if (indexUser === -1) throw Exception(404, 'not_found');
+    if (indexUser === -1) throw Exception(404, "not_found");
 
     users.splice(indexUser, 1);
 
