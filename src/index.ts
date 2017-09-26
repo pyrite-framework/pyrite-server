@@ -1,43 +1,41 @@
 import * as bodyParser from 'body-parser';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
-import * as logger from 'morgan';
-import * as path from 'path';
 import * as fs from 'fs';
 
 export class Server {
   static app: express.Application;
   port: number;
   routesPath: string;
+  __config: Function;
 
-  constructor(params: { port: number, routes: string }) {
+  constructor(params: { port: number, routes: string, config?: Function }) {
     Server.app = express();
     Server.app.use(bodyParser.json());
+    Server.app.use(cookieParser());
 
     this.port = params.port;
     this.routesPath = params.routes;
+    if (params.config) this.config(params.config)
   }
 
-  loadRoutes(): void {
-    fs.readdirSync(__dirname + this.routesPath).forEach((file) => {
-      require(__dirname + this.routesPath + '/' + file);
+  __loadRoutes(): void {
+    fs.readdirSync(this.routesPath).forEach((file) => {
+      require(this.routesPath + '/' + file);
     });
   }
 
+  config(cb) {
+    this.__config = cb.bind(this, Server.app);
+    return this;
+  }
+
   listen(cb: Function): void {
-    this.loadRoutes();
+    this.__loadRoutes();
+    if (this.__config) this.__config();
 
     setTimeout(() => {
       Server.app.listen(this.port, cb.bind({}, this.port));
     });
   }
 }
-
-const server: Server = new Server({
-  port: 8080,
-  routes: '/routes'
-});
-
-server.listen((port) => {
-  console.log(`Example app listening on port ${port}!`);
-});

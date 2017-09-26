@@ -1,31 +1,28 @@
-module.exports = function(grunt) {
-  'use strict';
-
+module.exports = (grunt) => {
   grunt.initConfig({
     ts: {
       app: {
-        files: [{
-          src: ['src/\*\*/\*.ts', '!src/.baseDir.ts'],
+        files: [ {
+          src: ['./example/\*\*/\*.ts', '!example/.baseDir.ts'],
           dest: './dist'
         }],
         options: {
           module: 'commonjs',
           target: 'es6',
           sourceMap: false,
-          rootDir: 'src',
+          rootDir: '.',
           experimentalDecorators: true
         }
       }
     },
     watch: {
       ts: {
-        files: ['src/\*\*/\*.ts'],
+        files: ['src/\*\*/\*.ts', 'example/\*\*/\*.ts'],
         tasks: ['ts']
       }
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-ts');
 
@@ -33,5 +30,4 @@ module.exports = function(grunt) {
     'ts',
     'watch'
   ]);
-
 };
