@@ -1,32 +1,52 @@
-export function Headers (target, method, descriptor): void {
-  return getParameters(target[method], "headers");
+export function Request (target: any, method: string, descriptor: any): void {
+  setParameters(target[method], "req");
 }
 
-export function Cookies (target, method, descriptor): void {
-  return getParameters(target[method], "cookies");
+export function Response (target: any, method: string, descriptor: any): void {
+  setParameters(target[method], "res");
 }
 
-export function Session (target, method, descriptor): void {
-  return getParameters(target[method], "session");
+export function Emit (target: any, method: string, descriptor: any): void {
+  setParameters(target[method], "emit");
 }
 
-export function Body (target, method, descriptor): void {
-  return getParameters(target[method], "body");
+export function Headers (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Headers(target, method, descriptor, targetDefault);
+
+  setParameters(targetDefault[method], "headers", key);
 }
 
-export function Query (targetDefault, method?, descriptor?, key?): any {
-  if (!method) return (target, method, descriptor) => Query(target, method, descriptor, targetDefault);
+export function Cookies (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Cookies(target, method, descriptor, targetDefault);
 
-  return getParameters(targetDefault[method], "query", key);
+  setParameters(targetDefault[method], "cookies", key);
 }
 
-export function Params (targetDefault, method?, descriptor?, key?): any {
-  if (!method) return (target, method, descriptor) => Params(target, method, descriptor, targetDefault);
+export function Session (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Session(target, method, descriptor, targetDefault);
 
-  return getParameters(targetDefault[method], "params", key);
+  setParameters(targetDefault[method], "session", key);
 }
 
-function getParameters(target, param, key?): void {
+export function Body (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Body(target, method, descriptor, targetDefault);
+
+  setParameters(targetDefault[method], "body", key);
+}
+
+export function Query (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Query(target, method, descriptor, targetDefault);
+
+  setParameters(targetDefault[method], "query", key);
+}
+
+export function Params (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Params(target, method, descriptor, targetDefault);
+
+  setParameters(targetDefault[method], "params", key);
+}
+
+function setParameters(target: any, param: string, key?: string): void {
   if (!target.parameters) target.parameters = [];
   
   target.parameters.unshift({

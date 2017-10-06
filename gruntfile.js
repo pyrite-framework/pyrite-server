@@ -4,12 +4,12 @@ module.exports = (grunt) => {
       app: {
         files: [ {
           src: ['./example/\*\*/\*.ts', '!example/.baseDir.ts'],
-          dest: './dist'
+          dest: './lib'
         }],
         options: {
           module: 'commonjs',
           target: 'es6',
-          sourceMap: false,
+          sourceMap: true,
           rootDir: '.',
           experimentalDecorators: true
         }
