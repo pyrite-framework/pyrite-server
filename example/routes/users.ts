@@ -13,10 +13,10 @@ let index = 0;
 @Route("/users")
 class Users {
   @Get("/")
-  getUsers(@Query("name") name: string): Array<UserModel> {
+  getUsers(@Query("name") name: string): Promise<UserModel[]> {
     const result = users.filter((user) => !name || user.name == name);
     
-    return result;
+    return Promise.resolve(result);
   }
 
   @Post("/")

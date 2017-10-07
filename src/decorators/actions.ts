@@ -47,7 +47,17 @@ class ActionHandler {
         result = this.target[this.method].after.reduce((prev: Function, next: Function) => next(prev), result);
       }
 
-      res.status(this.target[this.method].status || 200).send(result);
+      if (result && typeof result.then === 'function') {
+        result.then((promisedResult) => {
+          res.status(this.target[this.method].status || 200).send(promisedResult);
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(error.status || 500).send(error.result);
+        })
+      } else {
+        res.status(this.target[this.method].status || 200).send(result);
+      }
     } catch (error) {
       console.log(error);
 
