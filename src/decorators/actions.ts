@@ -82,7 +82,7 @@ class ActionHandler {
   }
 
   private getOrder (parameters: Array<any>, request: Request, response: Response): Array<any> {
-    if (!parameters) return [];
+    if (!parameters) return [request, response];
     if (this.types.length) this.setTypes(this.path, this.types, request.params);
 
     return parameters.map((parameter: Parameter): any => {
