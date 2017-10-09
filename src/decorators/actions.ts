@@ -11,6 +11,8 @@ interface Parameter {
   key?: string;
 };
 
+type ParamType = Array<StringConstructor|NumberConstructor>;
+
 class ActionHandler {
   emitCallback: Function;
 
@@ -96,13 +98,13 @@ class ActionHandler {
   }
 }
 
-export const Get = (path: string, ...types: Array<StringConstructor|NumberConstructor>): Function => handler("get", path, types);
-export const Post = (path: string, ...types: Array<StringConstructor|NumberConstructor>): Function => handler("post", path, types);
-export const Put = (path: string, ...types: Array<StringConstructor|NumberConstructor>): Function => handler("put", path, types);
-export const Delete = (path: string, ...types: Array<StringConstructor|NumberConstructor>): Function => handler("delete", path, types);
-export const Head = (path: string, ...types: Array<StringConstructor|NumberConstructor>): Function => handler("head", path, types);
+export const Get = (path: string, ...types: ParamType): Function => handler("get", path, types);
+export const Post = (path: string, ...types: ParamType): Function => handler("post", path, types);
+export const Put = (path: string, ...types: ParamType): Function => handler("put", path, types);
+export const Delete = (path: string, ...types: ParamType): Function => handler("delete", path, types);
+export const Head = (path: string, ...types: ParamType): Function => handler("head", path, types);
 
-function handler (action: string, path: string, types: Array<StringConstructor|NumberConstructor>): Function {
+function handler (action: string, path: string, types: ParamType): Function {
   return function (target: any, method: string, descriptor: PropertyDescriptor): void {
     target[method].path = path;
     setTimeout(() => new ActionHandler(target, method, path, types, action));

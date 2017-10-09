@@ -3,9 +3,9 @@ import * as uuid from "uuid/v4";
 import { Server } from "./index";
 
 export class Emiter {
-  static socket: any;
-  static socketsSend: any = {};
-  static socketsGet: any = {};
+  static socket: SocketIO.Server;
+  static socketsSend: {[key:string]: SocketIO.Socket} = {};
+  static socketsGet: {[key:string]: SocketIO.Socket} = {};
 
   constructor(app: any) {
     Emiter.socket = io(app);
@@ -13,7 +13,7 @@ export class Emiter {
   }
 
   private load(): void {
-    Emiter.socket.on("connection", (socket: any) => {
+    Emiter.socket.on("connection", (socket: SocketIO.Socket) => {
       const token = uuid();
       const id = uuid();
 
