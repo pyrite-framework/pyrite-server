@@ -5,9 +5,18 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Emiter } from "./emiter.js";
-import * as Actions from "./decorators/actions";
-import * as General from "./decorators/general";
-import * as Parameters from "./decorators/parameters";
+
+export {
+  Get, Post, Put, Delete, Head
+} from  "./decorators/actions";
+
+export {
+  Alias, Route, Status, Before, After, Emits, Broadcast, Exception
+} from "./decorators/general";
+
+export {
+  Request, Response, Headers, Cookies, Session, Query, Params, Body, Emit
+} from "./decorators/parameters";
 
 interface ServerConfig {
   (app: express.Application): void;
@@ -70,33 +79,3 @@ export class Server {
     });
   }
 }
-
-export function Exception (status: number, result: any): { status: number, result: any } {
-  return {
-    status, result
-  };
-}
-
-export const Get = Actions.Get;
-export const Post = Actions.Post;
-export const Put = Actions.Put;
-export const Delete = Actions.Delete;
-export const Head = Actions.Head;
-
-export const Alias = General.Alias;
-export const Route = General.Route;
-export const Status = General.Status;
-export const Before = General.Before;
-export const After = General.After;
-export const Emits = General.Emits;
-export const Broadcast = General.Broadcast;
-
-export const Request = Parameters.Request;
-export const Response = Parameters.Response;
-export const Headers = Parameters.Headers;
-export const Cookies = Parameters.Cookies;
-export const Session = Parameters.Session;
-export const Query = Parameters.Query;
-export const Params = Parameters.Params;
-export const Body = Parameters.Body;
-export const Emit = Parameters.Emit;

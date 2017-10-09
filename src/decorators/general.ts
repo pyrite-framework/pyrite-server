@@ -61,3 +61,10 @@ export function Broadcast (target: any, method: string, descriptor: PropertyDesc
   target[method].broadcast = true;
   target[method].broadcastTo = target[method].name;
 }
+
+export function Exception (status: number, result: any): { status: number, result: any } {
+  return {
+    status, result
+  };
+}
+
