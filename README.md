@@ -96,10 +96,9 @@ class Users {
 ## Develop new contributions
 
 ```sh
-sudo npm install -g nodemon
-npm install
+sudo npm install -g nodemon typescript concurrently
 
+npm install
 npm run watch
-npm start #in another terminal
 ```
 
