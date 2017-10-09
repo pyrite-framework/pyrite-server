@@ -32,8 +32,8 @@ export function Before (middleware: Middleware): Function {
 
     if (!method) {
       if (!target.prototype.beforeAll) befores = target.prototype.beforeAll = [];
-
-      return target.prototype.beforeAll.unshift(middleware);
+      target.prototype.beforeAll.unshift(middleware);
+      return target;
     }
 
     if (method && !target[method].before) {

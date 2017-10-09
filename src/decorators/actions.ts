@@ -88,11 +88,11 @@ class ActionHandler {
     if (this.types.length) this.setTypes(this.path, this.types, request.params);
 
     return parameters.map((parameter: Parameter): any => {
-      if (parameter.key) return getDescendantProp((<any> request)[parameter.param], parameter.key);
-      else if (parameter.param === 'req') return request;
-      else if (parameter.param === 'res') return response;
+      if (parameter.param === 'req') return getDescendantProp(request, parameter.key);
+      else if (parameter.param === 'res') return getDescendantProp(response, parameter.key);
       else if (parameter.param === 'emit') return this.emitCallback.bind(this, request.headers["pyrite-token"], request.headers["pyrite-id"]);
-      
+      else if (parameter.key) return getDescendantProp((<any> request)[parameter.param], parameter.key);
+
       return (<any> request)[parameter.param];
     });
   }

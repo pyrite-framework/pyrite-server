@@ -1,13 +1,13 @@
-export function Request (target: any, method: string, descriptor: any): void {
-  setParameters(target[method], "req");
+export function Request (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Request(target, method, descriptor, targetDefault);
+
+  setParameters(targetDefault[method], "req", key);
 }
 
-export function Response (target: any, method: string, descriptor: any): void {
-  setParameters(target[method], "res");
-}
+export function Response (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => Response(target, method, descriptor, targetDefault);
 
-export function Emit (target: any, method: string, descriptor: any): void {
-  setParameters(target[method], "emit");
+  setParameters(targetDefault[method], "res", key);
 }
 
 export function Headers (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
@@ -44,6 +44,10 @@ export function Params (targetDefault: any, method?: string, descriptor?: any, k
   if (!method) return (target: any, method: string, descriptor: any) => Params(target, method, descriptor, targetDefault);
 
   setParameters(targetDefault[method], "params", key);
+}
+
+export function Emit (target: any, method: string, descriptor: any): void {
+  setParameters(target[method], "emit");
 }
 
 function setParameters(target: any, param: string, key?: string): void {
