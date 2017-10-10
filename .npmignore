@@ -1,5 +1,4 @@
 /src
 /example
 lib/example
-lib/**/*.js
 lib/**/*.map
