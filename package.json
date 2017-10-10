@@ -4,6 +4,7 @@
   "version": "0.1.4",
   "author": "Fabio Garcia",
   "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
   "license": "MIT",
   "scripts": {
     "build": "tsc -w",

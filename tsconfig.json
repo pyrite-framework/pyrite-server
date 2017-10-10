@@ -5,7 +5,8 @@
     "sourceMap": true,
     "rootDir": ".",
     "experimentalDecorators": true,
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "declaration": true
   },
   "include": [
     "./example/**/*.ts"

@@ -18,11 +18,11 @@ export {
   Request, Response, Headers, Cookies, Session, Query, Params, Body, Emit
 } from "./decorators/parameters";
 
-interface ServerConfig {
+export interface ServerConfig {
   (app: express.Application): void;
 };
 
-interface ServerParams {
+export interface ServerParams {
   port: number;
   routes: any;
   config?: ServerConfig;

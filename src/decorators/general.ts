@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Server } from "../index";
 
-interface Middleware {
+export interface Middleware {
   (req: Request, res: Response, next: Function): void;
 };
 
