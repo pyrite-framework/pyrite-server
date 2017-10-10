@@ -6,8 +6,9 @@ export class Emiter {
   static socket: SocketIO.Server;
   static socketsSend: {[key:string]: SocketIO.Socket} = {};
   static socketsGet: {[key:string]: SocketIO.Socket} = {};
+  static tokenToId: {[key:string]: string} = {};
 
-  constructor(app: any) {
+  constructor(app) {
     Emiter.socket = io(app);
     setTimeout(() => this.load());
   }
@@ -18,6 +19,8 @@ export class Emiter {
       const id = uuid();
 
       Emiter.socketsSend[token] = Emiter.socketsGet[id] = socket;
+
+      Emiter.tokenToId[token] = id;
 
       const dataEmited: any = {
         controllers: Server.controllersAllowed,
@@ -39,18 +42,28 @@ export class Emiter {
       Server.controllersAllowed[target.alias][target[method].alias].emits = true;
     }
 
-    const emitCallback = (dataEmited: any, token: string, sendOne: string) => {
-      const msg = `${target.constructor.alias}.on.${target[method].alias}`;
+    const emitCallback = (token: string, sendOne: string, data: any): any => {
+      const msg = `${target.alias}.on.${target[method].alias}`;
+      const id = Emiter.tokenToId[token];
 
       if (sendOne) {
         console.log(`Emit: ${msg} to ${sendOne}`);
-        Emiter.socketsGet[sendOne].emit(msg, dataEmited);
+        const emiter = Emiter.socketsGet[sendOne];
+
+        if (emiter) emiter.emit(msg, { id, data });
+        else Emiter.socketsGet[id].emit(msg, { 
+          id: id,
+          data: {
+            error: 'Emit: ' + sendOne + ' not found'
+          }
+        });
+
       } else if (target[method].emits) {
         console.log(`Emit: ${msg}`);
-        Emiter.socket.emit(msg, dataEmited);
+        Emiter.socket.emit(msg, { id, data });
       } else if (target[method].broadcast) {
         console.log(`Broadcast: ${msg}`);
-        Emiter.socketsSend[token].broadcast.emit(msg, dataEmited);
+        Emiter.socketsSend[token].broadcast.emit(msg, { id, data });
       }
     };
 

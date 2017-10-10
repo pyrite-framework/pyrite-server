@@ -4,6 +4,7 @@ import { Server } from "../src";
 
 const server: Server = new Server({
   port: 8000,
+  cors: ["http://localhost:8080"],
   routes: "/routes"
 });
 

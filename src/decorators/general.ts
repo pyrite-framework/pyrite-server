@@ -63,8 +63,10 @@ export function Broadcast (target: any, method: string, descriptor: PropertyDesc
 }
 
 export function Exception (status: number, result: any): { status: number, result: any } {
+  const error = { error: result };
   return {
-    status, result
+    status,
+    result: error
   };
 }
 

@@ -3,6 +3,7 @@ import * as cookieParser from "cookie-parser";
 import * as express from "express";
 import * as fs from "fs";
 import * as path from "path";
+import * as cors from "cors";
 
 import { Emiter } from "./emiter.js";
 
@@ -25,6 +26,7 @@ export interface ServerConfig {
 export interface ServerParams {
   port: number;
   routes: any;
+  cors?: Array<string>
   config?: ServerConfig;
 };
 
@@ -37,6 +39,12 @@ export class Server {
     Server.app = express();
     Server.app.use(bodyParser.json());
     Server.app.use(cookieParser());
+
+    if (params.cors) {
+      Server.app.use(cors({
+        origin: params.cors
+      }));
+    }
 
     if (params.config) this.config(params.config);
   }

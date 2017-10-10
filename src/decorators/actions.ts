@@ -29,7 +29,8 @@ class ActionHandler {
     target[method].alias = target[method].alias || target[method].name;
 
     Server.controllersAllowed[target.alias][target[method].alias] = {
-      url: target.path + (target[method].path)
+      url: target.path + (target[method].path),
+      action: action.toUpperCase()
     };
 
     (<any> Server.app)[action](target.path + target[method].path, ...befores);
