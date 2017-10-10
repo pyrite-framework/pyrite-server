@@ -1,5 +1,4 @@
 npm-debug.log
 node_modules
 .tscache
-/lib
-!/lib/src/**/*.d.ts
+lib
