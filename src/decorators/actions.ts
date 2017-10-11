@@ -30,7 +30,8 @@ class ActionHandler {
 
     Server.controllersAllowed[target.alias][target[method].alias] = {
       url: target.path + (target[method].path),
-      action: action.toUpperCase()
+      action: action.toUpperCase(),
+      validations: target[method].validations
     };
 
     (<any> Server.app)[action](target.path + target[method].path, ...befores);
@@ -38,7 +39,14 @@ class ActionHandler {
     this.emitCallback = Emiter.loadEmit(target, method);
   }
 
+  private loadPlugins (req: Request, res: Response): Boolean {
+    return Server.plugins.some((plugin: any): any => plugin.run(req, res, this.target, this.method));
+  }
+
   private middleware (req: Request, res: Response): void {
+    const failSome = this.loadPlugins(req, res);
+    if (failSome) return;
+
     let parameters: Array<any> = this.getOrder(this.target[this.method].parameters, req, res);
 
     console.log(`${this.action.toUpperCase()} ${this.target.path + this.path}`);

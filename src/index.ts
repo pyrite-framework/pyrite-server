@@ -26,14 +26,16 @@ export interface ServerConfig {
 export interface ServerParams {
   port: number;
   routes: any;
-  cors?: Array<string>
+  cors?: Array<string>;
   config?: ServerConfig;
+  plugins?: Array<any>;
 };
 
 export class Server {
   static app: express.Application;
   private emiter: Emiter;
   static controllersAllowed: any = {};
+  static plugins: Array<any> = [];
 
   constructor(private params: ServerParams) {
     Server.app = express();
@@ -45,6 +47,8 @@ export class Server {
         origin: params.cors
       }));
     }
+
+    if (params.plugins) Server.plugins = params.plugins;
 
     if (params.config) this.config(params.config);
   }
