@@ -30,7 +30,7 @@ server.listen(() => {
   
 ```typescript
 import { 
-  Route, Get, Post, Put, Delete, Exception, Body, Params, Query, Emits, Emit, Broadcast
+  Route, Get, Post, Put, Delete, Exception, Body, Params, Query
 } from "pyrite-server";
 
 const users = [];
@@ -46,13 +46,10 @@ class Users {
   }
 
   @Post("/")
-  @Broadcast
-  createUser(@Body user, @Emit emit) {
+  createUser(@Body user) {
     user.id = index++;
 
     users.push(user);
-
-    emit(user);
     
     return user;
   }
@@ -67,38 +64,23 @@ class Users {
 
   @Put("/:id", Number)
   @Broadcast
-  updateUser(@Body user, @Emit emit) {
+  updateUser(@Body user) {
     const foundUser = users.find((localUser) => localUser.id === user.id);
     if (!user) throw Exception(404, "not_found");
 
     Object.assign(foundUser, user);
 
-    emit(user);
-
     return user;
   }
 
   @Delete("/:id", Number)
-  @Emits
-  removeUser(@Params("id") id, @Emit emit) {
+  removeUser(@Params("id") id) {
     const indexUser = users.findIndex((user) => user.id === id);
     if (indexUser === -1) throw Exception(404, "not_found");
 
     users.splice(indexUser, 1);
 
-    emit(id);
-
     return true;
   }
 }
 ```
-
-## Develop new contributions
-
-```sh
-sudo npm install -g nodemon typescript concurrently
-
-npm install
-npm run watch
-```
-

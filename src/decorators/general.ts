@@ -61,16 +61,6 @@ export function After (middleware: Function): Function {
   };
 }
 
-export function Emits (target: any, method: string, descriptor: PropertyDescriptor): void {
-  target[method].emits = true;
-  target[method].emitsTo = target[method].name;
-}
-
-export function Broadcast (target: any, method: string, descriptor: PropertyDescriptor): void {
-  target[method].broadcast = true;
-  target[method].broadcastTo = target[method].name;
-}
-
 export function Exception (status: number, result: any): { status: number, result: any } {
   const error = { error: result };
   return {

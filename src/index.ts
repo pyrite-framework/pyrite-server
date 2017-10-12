@@ -5,18 +5,16 @@ import * as fs from "fs";
 import * as path from "path";
 import * as cors from "cors";
 
-import { Emiter } from "./emiter.js";
-
 export {
   Get, Post, Put, Delete, Head
 } from  "./decorators/actions";
 
 export {
-  Alias, Route, Status, Before, After, Emits, Broadcast, Exception
+  Alias, Route, Status, Before, After, Exception
 } from "./decorators/general";
 
 export {
-  Request, Response, Headers, Cookies, Session, Query, Params, Body, Emit
+  Request, Response, Headers, Cookies, Session, Query, Params, Body
 } from "./decorators/parameters";
 
 export interface ServerConfig {
@@ -44,7 +42,6 @@ function bodyParserError(error, req, res, next) {
 
 export class Server {
   static app: express.Application;
-  private emiter: Emiter;
   static controllersAllowed: any = {};
   static plugins: Array<any> = [];
 
@@ -82,8 +79,10 @@ export class Server {
     });
   }
 
-  private loadEmiters(server: any): void {
-    this.emiter = new Emiter(server);
+  private loadEmitters(server): void {
+    const emitter = Server.plugins.find((plugin: any) => plugin.type === "emitter");
+
+    if (emitter) emitter.run(Server, server);
   }
 
   private configCallback(): void {}
@@ -98,7 +97,7 @@ export class Server {
     this.configCallback();
 
     const server = Server.app.listen(this.params.port, () => {
-      this.loadEmiters(server);
+      this.loadEmitters(server);
       callbackListen();
     });
   }

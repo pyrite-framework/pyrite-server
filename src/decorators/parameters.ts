@@ -30,10 +30,6 @@ export const Params = (target: any, method?: string, descriptor?: any): any => {
   return setParametersType("params", target, method, descriptor);
 }
 
-export function Emit (target: any, method: string, descriptor: any): void {
-  return setParameters(target[method], "emit");
-}
-
 function setParametersType(type: string, targetDefault: any, method?: string, descriptor?: any, key?: string): any {
   if (!method) return (target: any, method: string, descriptor: any) => {
     return setParametersType(type, target, method, descriptor, targetDefault);

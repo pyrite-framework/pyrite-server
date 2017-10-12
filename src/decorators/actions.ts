@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { Server } from "../index";
-import { Emiter } from "../emiter";
 
 interface Middleware {
   (req: Request, res: Response, next: Function): void;
@@ -35,15 +34,23 @@ class ActionHandler {
 
     (<any> Server.app)[action](target.path + target[method].path, ...befores);
 
-    this.emitCallback = Emiter.loadEmit(target, method);
+    const emitter = this.loadMiddlewareEmitter();
+
+    if (emitter) this.emitCallback = emitter.loadEmit(target, method);
   }
 
-  private loadPlugins (req: Request, res: Response): Boolean {
-    return Server.plugins.some((plugin: any): any => plugin.run(req, res, this.target, this.method));
+  private loadMiddlewareEmitter(): any {
+    return Server.plugins.find((plugin: any) => plugin.type === "emitter");
+  }
+
+  private loadMiddlewarePlugins (req: Request, res: Response): Boolean {
+    return Server.plugins
+    .filter((plugin: any) => plugin.type === "middleware")
+    .some((plugin: any): any => plugin.run(req, res, this.target, this.method));
   }
 
   private middleware (req: Request, res: Response): void {
-    const failSome = this.loadPlugins(req, res);
+    const failSome = this.loadMiddlewarePlugins(req, res);
     if (failSome) return;
 
     let parameters: Array<any> = this.getOrder(this.target[this.method], req, res);
