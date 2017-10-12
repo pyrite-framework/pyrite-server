@@ -97,9 +97,9 @@ export class Server {
     this.loadRoutes();
     this.configCallback();
 
-    setTimeout(() => {
-      const server: any = Server.app.listen(this.params.port, callbackListen);
+    const server = Server.app.listen(this.params.port, () => {
       this.loadEmiters(server);
+      callbackListen();
     });
   }
 }

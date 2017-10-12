@@ -10,7 +10,7 @@ export class Emiter {
 
   constructor(app) {
     Emiter.socket = io(app);
-    setTimeout(() => this.load());
+    this.load();
   }
 
   private load(): void {
@@ -50,14 +50,16 @@ export class Emiter {
         console.log(`Emit: ${msg} to ${sendOne}`);
         const emiter = Emiter.socketsGet[sendOne];
 
-        if (emiter) emiter.emit(msg, { id, data });
-        else Emiter.socketsGet[id].emit(msg, { 
-          id: id,
-          data: {
-            error: 'Emit: ' + sendOne + ' not found'
-          }
-        });
-
+        if (emiter) {
+          emiter.emit(msg, { id, data });
+        } else {
+          Emiter.socketsGet[id].emit(msg, { 
+            id: id,
+            data: {
+              error: 'Emit: ' + sendOne + ' not found'
+            }
+          });
+        }
       } else if (target[method].emits) {
         console.log(`Emit: ${msg}`);
         Emiter.socket.emit(msg, { id, data });

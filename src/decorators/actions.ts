@@ -11,12 +11,11 @@ interface Parameter {
   key?: string;
 };
 
-type ParamType = Array<StringConstructor|NumberConstructor>;
-
 class ActionHandler {
   emitCallback: Function;
 
-  constructor (private target: any, private method: string, private path: string, private types: Array<StringConstructor|NumberConstructor>, private action: string) {
+  constructor (private target: any, private method: string, private path: any, private types: Array<any>, private action: string) {
+    target[method].path = path || "/" + target[method].name;
     console.log(`Loading route: ${action.toUpperCase()} ${target.path}${target[method].path}`);
 
     let befores: Array<Middleware> = [];
@@ -47,9 +46,9 @@ class ActionHandler {
     const failSome = this.loadPlugins(req, res);
     if (failSome) return;
 
-    let parameters: Array<any> = this.getOrder(this.target[this.method].parameters, req, res);
+    let parameters: Array<any> = this.getOrder(this.target[this.method], req, res);
 
-    console.log(`${this.action.toUpperCase()} ${this.target.path + this.path}`);
+    console.log(`${this.action.toUpperCase()} ${this.target.path + this.target[this.method].path}`);
 
     try {
       let result = this.target[this.method](...parameters);
@@ -58,7 +57,7 @@ class ActionHandler {
         result = this.target[this.method].after.reduce((prev: Function, next: Function) => next(prev), result);
       }
 
-      if (result && typeof result.then === 'function') {
+      if (result && typeof result.then === "function") {
         result.then((promisedResult) => {
           res.status(this.target[this.method].status || 200).send(promisedResult);
         })
@@ -92,14 +91,17 @@ class ActionHandler {
     return parameters;
   }
 
-  private getOrder (parameters: Array<any>, request: Request, response: Response): Array<any> {
+  private getOrder (target: any, request: Request, response: Response): Array<any> {
+    const parameters = target.parameters;
+    const path = target.path;
+
     if (!parameters) return [request, response];
-    if (this.types.length) this.setTypes(this.path, this.types, request.params);
+    if (this.types.length) this.setTypes(path, this.types, request.params);
 
     return parameters.map((parameter: Parameter): any => {
-      if (parameter.param === 'req') return getDescendantProp(request, parameter.key);
-      else if (parameter.param === 'res') return getDescendantProp(response, parameter.key);
-      else if (parameter.param === 'emit') return this.emitCallback.bind(this, request.headers["pyrite-token"], request.headers["pyrite-id"]);
+      if (parameter.param === "request") return getDescendantProp(request, parameter.key);
+      else if (parameter.param === "response") return getDescendantProp(response, parameter.key);
+      else if (parameter.param === "emit") return this.emitCallback.bind(this, request.headers["pyrite-token"], request.headers["pyrite-id"]);
       else if (parameter.key) return getDescendantProp((<any> request)[parameter.param], parameter.key);
 
       return (<any> request)[parameter.param];
@@ -107,15 +109,18 @@ class ActionHandler {
   }
 }
 
-export const Get = (path: string, ...types: ParamType): Function => handler("get", path, types);
-export const Post = (path: string, ...types: ParamType): Function => handler("post", path, types);
-export const Put = (path: string, ...types: ParamType): Function => handler("put", path, types);
-export const Delete = (path: string, ...types: ParamType): Function => handler("delete", path, types);
-export const Head = (path: string, ...types: ParamType): Function => handler("head", path, types);
+export const Get = (path?: any, ...types: Array<any>): any => handler("get", path, types);
+export const Post = (path?: any, ...types: Array<any>): any => handler("post", path, types);
+export const Put = (path?: any, ...types: Array<any>): any => handler("put", path, types);
+export const Delete = (path?: any, ...types: Array<any>): any => handler("delete", path, types);
+export const Head = (path?: any, ...types: Array<any>): any => handler("head", path, types);
 
-function handler (action: string, path: string, types: ParamType): Function {
+function handler (action: string, path: any, types: Array<any>): any {
+  if (typeof path === "object") {
+    return setTimeout(() => new ActionHandler(path, types[0], null, [], action));
+  }
+
   return function (target: any, method: string, descriptor: PropertyDescriptor): void {
-    target[method].path = path;
     setTimeout(() => new ActionHandler(target, method, path, types, action));
   }
 }

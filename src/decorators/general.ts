@@ -11,7 +11,16 @@ export function Alias (name: string): Function {
   };
 }
 
-export function Route (path: string, alias?: string): Function {
+export function Route (path?: any, alias?: string): any {
+  if(typeof path === "function") {
+    path.prototype.path = "/" + path.name;
+    path.prototype.alias = path.name;
+
+    Server.controllersAllowed[path.prototype.alias] = {};
+
+    return path;
+  }
+
   return function(target: any, method: string, descriptor: PropertyDescriptor): void {
     target.prototype.path = alias ? '/' + alias : path;
     target.prototype.alias = alias || target.name;

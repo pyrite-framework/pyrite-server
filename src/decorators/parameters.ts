@@ -1,53 +1,45 @@
-export function Request (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Request(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "req", key);
+export const Request = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("request", target, method, descriptor);
 }
 
-export function Response (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Response(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "res", key);
+export const Response = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("response", target, method, descriptor);
 }
 
-export function Headers (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Headers(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "headers", key);
+export const Headers = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("headers", target, method, descriptor);
 }
 
-export function Cookies (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Cookies(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "cookies", key);
+export const Cookies = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("cookies", target, method, descriptor);
 }
 
-export function Session (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Session(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "session", key);
+export const Session = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("session", target, method, descriptor);
 }
 
-export function Body (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Body(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "body", key);
+export const Body = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("body", target, method, descriptor);
 }
 
-export function Query (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Query(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "query", key);
+export const Query = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("query", target, method, descriptor);
 }
 
-export function Params (targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => Params(target, method, descriptor, targetDefault);
-
-  setParameters(targetDefault[method], "params", key);
+export const Params = (target: any, method?: string, descriptor?: any): any => {
+  return setParametersType("params", target, method, descriptor);
 }
 
 export function Emit (target: any, method: string, descriptor: any): void {
-  setParameters(target[method], "emit");
+  return setParameters(target[method], "emit");
+}
+
+function setParametersType(type: string, targetDefault: any, method?: string, descriptor?: any, key?: string): any {
+  if (!method) return (target: any, method: string, descriptor: any) => {
+    return setParametersType(type, target, method, descriptor, targetDefault);
+  }
+
+  return setParameters(targetDefault[method], type, key);
 }
 
 function setParameters(target: any, param: string, key?: string): void {
