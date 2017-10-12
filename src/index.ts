@@ -31,6 +31,17 @@ export interface ServerParams {
   plugins?: Array<any>;
 };
 
+function bodyParserError(error, req, res, next) {
+  if (!(error instanceof SyntaxError)) next();
+
+  res.status(400).send({
+    error: {
+      message: 'invalid json',
+      exception: error.message
+    }
+  });
+}
+
 export class Server {
   static app: express.Application;
   private emiter: Emiter;
@@ -40,6 +51,7 @@ export class Server {
   constructor(private params: ServerParams) {
     Server.app = express();
     Server.app.use(bodyParser.json());
+    Server.app.use(bodyParserError);
     Server.app.use(cookieParser());
 
     if (params.cors) {
