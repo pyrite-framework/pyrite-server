@@ -1,5 +1,7 @@
+import { Application } from "express";
+
 export interface ServerConfig {
-	(app: Express.Application): void;
+	(app: Application): void;
 };
 
 export interface ServerParams {
@@ -18,3 +20,28 @@ export interface Parameter {
 	param: string;
 	key?: string;
 };
+
+export interface RouteConfig {
+	method: string;
+	path: string|null;
+	types: Array<any>;
+	action: string;
+};
+
+export interface Exception {
+	error: any;
+	status: number;
+};
+
+export interface Method {
+	(parameters?: Array<any>): any;
+	before: Array<Middleware>;
+	after: Array<Function>;
+	parameters: Array<Parameter>;
+	validations: Array<any>;
+	status: number;
+	path: string;
+	alias: string;
+	name: string;
+}
+

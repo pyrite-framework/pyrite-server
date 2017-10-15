@@ -2,61 +2,66 @@ import * as I from "./interfaces";
 
 export class Route {
 	emitCallback: Function;
+	targetMethod: I.Method;
+	befores: Array<I.Middleware>;
 
-	constructor(private server: any, target: any, method: string, path: any, types: Array<any>, action: string) {
-		target[method].path = path || "/" + target[method].name;
-		console.log(`Loading route: ${action.toUpperCase()} ${target.path}${target[method].path}`);
+	constructor(
+		public server: any,
+		public target: any,
+		public method: string,
+		public path: string,
+		public types: Array<any>,
+		public action: string
+	) {
+		this.targetMethod = target[method];
+		this.targetMethod.path = path || "/" + this.targetMethod.name;
+		this.targetMethod.alias = this.targetMethod.alias || this.targetMethod.name;
 
-		let befores: Array<I.Middleware> = [];
+		console.log(`Loading route: ${action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
-		if (target[method] && target[method].before) befores = befores.concat(target[method].before);
-		if (target.beforeAll) befores = target.beforeAll.concat(befores);
+		this.befores = this.addBeforeMiddlewares();
 
-		befores.push(this.middleware.bind(this, target, method, action, types));
-
-		target[method].alias = target[method].alias || target[method].name;
-
-		this.server.controllersAllowed[target.alias][target[method].alias] = {
-			url: target.path + (target[method].path),
-			action: action.toUpperCase(),
-			validations: target[method].validations
-		};
-
-		(<any>this.server.app)[action](target.path + target[method].path, ...befores);
-
-		this.loadMiddlewareEmitter(target, method);
+		this.befores.push(this.mainMiddleware.bind(this));
 	}
 
-	private loadMiddlewareEmitter(target: any, method: string): void {
-		const emitter =  this.server.plugins.find((plugin: any) => plugin.type === "emitter");
-		if (emitter) this.emitCallback = emitter.loadEmit(target, method);
-	}
-
-	private loadMiddlewarePlugins(target: any, method: string, req: any, res: any): Boolean {
+	private loadMiddlewarePlugins(req: any, res: any): Boolean {
 		return this.server.plugins
 			.filter((plugin: any) => plugin.type === "middleware")
-			.some((plugin: any): any => plugin.run(req, res, target, method));
+			.some((plugin: any): any => plugin.run(req, res, this.target, this.method));
 	}
 
-	private middleware(target: any, method: any, action: string, types: Array<any>, req: any, res: any): void {
-		const failSome = this.loadMiddlewarePlugins(target, method, req, res);
+	private addBeforeMiddlewares(): Array<I.Middleware> {
+		let befores: Array<I.Middleware> = [];
+
+		if (this.targetMethod && this.targetMethod.before) befores = befores.concat(this.targetMethod.before);
+		if (this.target.beforeAll) befores = this.target.beforeAll.concat(befores);
+
+		return befores;
+	}
+
+	private addAfterMiddlewares(result: any): any {
+		if (!this.targetMethod.after) return result;
+
+		return this.targetMethod.after.reduce((prev: Function, next: Function) => next(prev), result);
+	}
+
+	private mainMiddleware(req: any, res: any): void {
+		const failSome = this.loadMiddlewarePlugins(req, res);
 		if (failSome) return;
 
-		let parameters: Array<any> = this.getOrder(target[method], types, req, res);
+		let parameters: Array<any> = this.getOrder(req, res);
 
-		console.log(`${action.toUpperCase()} ${target.path + target[method].path}`);
+		console.log(`${this.action.toUpperCase()} ${this.target.path + this.targetMethod.path}`);
 
-		let result = target[method](...parameters);
+		let result = this.targetMethod(...parameters);
 
-		if (target[method].after) {
-			result = target[method].after.reduce((prev: Function, next: Function) => next(prev), result);
-		}
+		result = this.addAfterMiddlewares(result);
 
 		if (!result || typeof result.then !== "function") result = Promise.resolve(result);
 
 		result.then((methodResult: any) => {
 			if (methodResult.error && methodResult.status) return res.status(methodResult.status).send({ error: methodResult.error });
-			res.status(target[method].status || 200).send(methodResult);
+			res.status(this.targetMethod.status || 200).send(methodResult);
 		})
 		.catch((error: any) => {
 			console.log(error);
@@ -80,12 +85,12 @@ export class Route {
 		return parameters;
 	}
 
-	private getOrder(target: any, types: Array<any>, request: any, response: any): Array<any> {
-		const parameters = target.parameters;
-		const path = target.path;
+	private getOrder(request: any, response: any): Array<any> {
+		const parameters = this.targetMethod.parameters;
+		const path = this.targetMethod.path;
 
 		if (!parameters) return [request, response];
-		if (types.length) this.setTypes(path, types, request.params);
+		if (this.types.length) this.setTypes(path, this.types, request.params);
 
 		return parameters.map((parameter: I.Parameter): any => {
 			if (parameter.param === "request") return this.getDescendantProp(request, parameter.key);

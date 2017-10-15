@@ -36,8 +36,8 @@ import {
 const users = [];
 let index = 0;
 
-@Route("/users")
-class Users {
+@Route
+export class Users {
   @Get("/")
   getUsers(@Query("name") name) {
     const result = users.filter((user) => !name || user.name === name);
@@ -63,7 +63,6 @@ class Users {
   }
 
   @Put("/:id", Number)
-  @Broadcast
   updateUser(@Body user) {
     const foundUser = users.find((localUser) => localUser.id === user.id);
     if (!user) throw Exception(404, "not_found");

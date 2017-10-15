@@ -8,8 +8,6 @@ import * as cors from "cors";
 import { Route } from "./route";
 import * as I from "./interfaces";
 
-export const serverInstances: Array<Server> = [];
-
 export class Server {
 	app: express.Application;
 	controllersAllowed: any = {};
@@ -18,8 +16,6 @@ export class Server {
 	constructor(private params: I.ServerParams) {
 		if (params.plugins) this.plugins = params.plugins;
 		if (params.config) this.config(params.config);
-
-		serverInstances.unshift(this);
 	}
 
 	private loadExpress(): void {
@@ -63,8 +59,33 @@ export class Server {
 			if (file.indexOf(".js.map") >= 0) return;
 			const controller = require(`${folder}/${file}`);
 
-			new controller[Object.keys(controller)[0]]();
+			const instance = new controller[Object.keys(controller)[0]]();
+
+			if (!instance.routes) return;
+
+			this.controllersAllowed[instance.alias] = {};
+
+			instance.routes.forEach((method: any) => {
+				const routeInstance = new Route(this, instance, method.method, method.path, method.types, method.action);
+				this.addRouteMiddleware(routeInstance);
+				this.loadMiddlewareEmitter(routeInstance);
+			})
 		});
+	}
+
+	private loadMiddlewareEmitter(route: Route): void {
+		const emitter = this.plugins.find((plugin: any) => plugin.type === "emitter");
+		if (emitter) route.emitCallback = emitter.loadEmit(route.target, route.method);
+	}
+
+	private addRouteMiddleware(route: Route) {
+		this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
+			url: route.target.path + (route.targetMethod.path),
+			action: route.action.toUpperCase(),
+			validations: route.targetMethod.validations
+		};
+
+		(<any>this.app)[route.action](route.target.path + route.targetMethod.path, ...route.befores);
 	}
 
 	private loadEmitters(server: any): void {
@@ -89,9 +110,5 @@ export class Server {
 			this.loadEmitters(server);
 			callbackListen();
 		});
-	}
-
-	createRoute(target: any, method: string, path: any, types: Array<any>, action: string): void {
-		new Route(this, target, method, path, types, action);
 	}
 }
