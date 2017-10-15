@@ -1,47 +1,63 @@
-export const Request = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("request", target, method, descriptor);
+export function Request(parameter: string): any;
+export function Request(target: any, method: string, descriptor: any): any;
+export function Request(target: any, method?: string): any {
+	return setParametersType("request", target, method);
 }
 
-export const Response = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("response", target, method, descriptor);
+export function Response(parameter: string): any;
+export function Response(target: any, method: string, descriptor: any): any;
+export function Response(target: any, method?: string): any {
+	return setParametersType("response", target, method);
 }
 
-export const Headers = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("headers", target, method, descriptor);
+export function Headers(parameter: string): any;
+export function Headers(target: any, method: string, descriptor: any): any;
+export function Headers(target: any, method?: string): any {
+	return setParametersType("headers", target, method);
 }
 
-export const Cookies = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("cookies", target, method, descriptor);
+export function Cookies(parameter: string): any;
+export function Cookies(target: any, method: string, descriptor: any): any;
+export function Cookies(target: any, method?: string): any {
+	return setParametersType("cookies", target, method);
 }
 
-export const Session = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("session", target, method, descriptor);
+export function Session(parameter: string): any;
+export function Session(target: any, method: string, descriptor: any): any;
+export function Session(target: any, method?: string): any {
+	return setParametersType("session", target, method);
 }
 
-export const Body = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("body", target, method, descriptor);
+export function Body(parameter: string): any;
+export function Body(target: any, method: string, descriptor: any): any;
+export function Body(target: any, method?: string): any {
+	return setParametersType("body", target, method);
 }
 
-export const Query = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("query", target, method, descriptor);
+export function Query(parameter: string): any;
+export function Query(target: any, method: string, descriptor: any): any;
+export function Query(target: any, method?: string): any {
+	return setParametersType("query", target, method);
 }
 
-export const Params = (target: any, method?: string, descriptor?: any): any => {
-  return setParametersType("params", target, method, descriptor);
+export function Params(parameter: string): any;
+export function Params(target: any, method: string, descriptor: any): any;
+export function Params(target: any, method?: string): any {
+	return setParametersType("params", target, method);
 }
 
-function setParametersType(type: string, targetDefault: any, method?: string, descriptor?: any, key?: string): any {
-  if (!method) return (target: any, method: string, descriptor: any) => {
-    return setParametersType(type, target, method, descriptor, targetDefault);
-  }
+function setParametersType(type: string, targetDefault: any, method?: string, key?: string): any {
+	if (!method) return (target: any, method: string): any => {
+		return setParametersType(type, target, method, targetDefault);
+	}
 
-  return setParameters(targetDefault[method], type, key);
+	return setParameters(targetDefault[method], type, key);
 }
 
-function setParameters(target: any, param: string, key?: string): void {
-  if (!target.parameters) target.parameters = [];
-  
-  target.parameters.unshift({
-    param, key
-  });
+function setParameters(target: any, param: string, key?: string): any {
+	if (!target.parameters) target.parameters = [];
+
+	target.parameters.unshift({
+		param, key
+	});
 }

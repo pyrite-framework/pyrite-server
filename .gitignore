@@ -3,3 +3,4 @@ node_modules
 .tscache
 lib
 example
+package-lock.json
