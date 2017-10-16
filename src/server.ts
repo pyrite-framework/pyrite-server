@@ -9,9 +9,9 @@ import { Route } from "./route";
 import * as I from "./interfaces";
 
 export class Server {
-	app: express.Application;
-	controllersAllowed: any = {};
-	plugins: Array<any> = [];
+	private app: express.Application;
+	private controllersAllowed: any = {};
+	private plugins: Array<any> = [];
 
 	constructor(private params: I.ServerParams) {
 		if (params.plugins) this.plugins = params.plugins;
@@ -20,6 +20,8 @@ export class Server {
 
 	private loadExpress(): void {
 		this.app = express();
+
+		this.app.use(bodyParser.urlencoded({ extended: true }));
 		this.app.use(bodyParser.json());
 		this.app.use(this.bodyParserError);
 		this.app.use(cookieParser());
@@ -42,34 +44,46 @@ export class Server {
 		});
 	}
 
-	private loadRoutes(): void {
+	private loadRouteFolders(): void {
 		if (!Array.isArray(this.params.routes)) this.params.routes = [this.params.routes];
 
 		this.params.routes.forEach((route: string) => {
+			this.loadRouteFile(route);
+		});
+	}
+
+	private loadRouteFile(routeFolder: string): void {
+		const rootPath = require.main ? require.main.filename : ".";
+
+		const folder: string = path.dirname(rootPath) + routeFolder;
+
+		fs.readdirSync(folder).forEach((file: string) => {
+			if (file.indexOf(".js") < 0) return;
+			if (file.indexOf(".js.map") >= 0) return;
+			const route = require(`${folder}/${file}`);
+
 			this.loadRoute(route);
 		});
 	}
 
-	private loadRoute(route: string): void {
-		const rootPath = require.main ? require.main.filename : ".";
+	private loadRoute(route: any) {
+		const routeControllers = Object.keys(route);
 
-		const folder: string = path.dirname(rootPath) + route;
+		routeControllers.forEach((routeKey) => {
+			const routeController = route[routeKey];
 
-		fs.readdirSync(folder).forEach((file: string) => {
-			if (file.indexOf(".js.map") >= 0) return;
-			const controller = require(`${folder}/${file}`);
+			if (!routeController.prototype.routes) return;
 
-			const instance = new controller[Object.keys(controller)[0]]();
-
-			if (!instance.routes) return;
+			const instance = new routeController();
 
 			this.controllersAllowed[instance.alias] = {};
 
-			instance.routes.forEach((method: any) => {
-				const routeInstance = new Route(this, instance, method.method, method.path, method.types, method.action);
+			instance.routes.forEach((method: I.RouteConfig) => {
+				const routeInstance = new Route(this, instance, method);
+
 				this.addRouteMiddleware(routeInstance);
 				this.loadMiddlewareEmitter(routeInstance);
-			})
+			});
 		});
 	}
 
@@ -81,11 +95,11 @@ export class Server {
 	private addRouteMiddleware(route: Route) {
 		this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
 			url: route.target.path + (route.targetMethod.path),
-			action: route.action.toUpperCase(),
+			action: route.method.action.toUpperCase(),
 			validations: route.targetMethod.validations
 		};
 
-		(<any>this.app)[route.action](route.target.path + route.targetMethod.path, ...route.befores);
+		(<any>this.app)[route.method.action](route.target.path + route.targetMethod.path, ...route.befores);
 	}
 
 	private loadEmitters(server: any): void {
@@ -94,7 +108,7 @@ export class Server {
 		if (emitter) emitter.run(Server, server);
 	}
 
-	private configCallback(): void { }
+	private configCallback(): void {}
 
 	public config(callbackConfig: I.ServerConfig) {
 		this.configCallback = callbackConfig.bind(this, this.app);
@@ -103,7 +117,7 @@ export class Server {
 
 	public listen(callbackListen: Function): void {
 		this.loadExpress();
-		this.loadRoutes();
+		this.loadRouteFolders();
 		this.configCallback();
 
 		const server = this.app.listen(this.params.port, () => {

@@ -30,11 +30,11 @@ function handler(action: string, path: any, types: Array<any>): any {
 	addRoute(path, types[0], action);
 }
 
-function addRoute(target: any, method: string, action: string, types: Array<any> = [], path: string|null = null) {
+function addRoute(target: any, methodName: string, action: string, types: Array<any> = [], path: string|null = null) {
 	if (!target.routes) target.routes = [];
 
 	const params: I.RouteConfig = {
-		method,
+		methodName,
 		path,
 		types,
 		action

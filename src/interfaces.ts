@@ -22,7 +22,7 @@ export interface Parameter {
 };
 
 export interface RouteConfig {
-	method: string;
+	methodName: string;
 	path: string|null;
 	types: Array<any>;
 	action: string;

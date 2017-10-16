@@ -6,18 +6,15 @@ export class Route {
 	befores: Array<I.Middleware>;
 
 	constructor(
-		public server: any,
+		private server: any,
 		public target: any,
-		public method: string,
-		public path: string,
-		public types: Array<any>,
-		public action: string
+		public method: I.RouteConfig
 	) {
-		this.targetMethod = target[method];
-		this.targetMethod.path = path || "/" + this.targetMethod.name;
+		this.targetMethod = target[method.methodName];
+		this.targetMethod.path = method.path || "/" + this.targetMethod.name;
 		this.targetMethod.alias = this.targetMethod.alias || this.targetMethod.name;
 
-		console.log(`Loading route: ${action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
+		console.log(`Loading route: ${method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
 		this.befores = this.addBeforeMiddlewares();
 
@@ -27,7 +24,7 @@ export class Route {
 	private loadMiddlewarePlugins(req: any, res: any): Boolean {
 		return this.server.plugins
 			.filter((plugin: any) => plugin.type === "middleware")
-			.some((plugin: any): any => plugin.run(req, res, this.target, this.method));
+			.some((plugin: any): any => plugin.run(req, res, this.target, this.method.methodName));
 	}
 
 	private addBeforeMiddlewares(): Array<I.Middleware> {
@@ -51,7 +48,7 @@ export class Route {
 
 		let parameters: Array<any> = this.getOrder(req, res);
 
-		console.log(`${this.action.toUpperCase()} ${this.target.path + this.targetMethod.path}`);
+		console.log(`${this.method.action.toUpperCase()} ${this.target.path + this.targetMethod.path}`);
 
 		let result = this.targetMethod(...parameters);
 
@@ -69,15 +66,15 @@ export class Route {
 		});
 	}
 
-	private setTypes(path: string, types: Array<any>, parameters: any): Array<any> {
-		const routes = path.split("/");
+	private setTypes(parameters: any): Array<any> {
+		const routes = this.targetMethod.path.split("/");
 
 		let paramNumber = 0;
 
 		routes.forEach((route: string) => {
 			if (route[0] === ":") {
 				const key = route.substring(1, route.length);
-				parameters[key] = types[paramNumber](parameters[key]);
+				parameters[key] = this.method.types[paramNumber](parameters[key]);
 				paramNumber++;
 			}
 		});
@@ -87,10 +84,9 @@ export class Route {
 
 	private getOrder(request: any, response: any): Array<any> {
 		const parameters = this.targetMethod.parameters;
-		const path = this.targetMethod.path;
 
 		if (!parameters) return [request, response];
-		if (this.types.length) this.setTypes(path, this.types, request.params);
+		if (this.method.types.length) this.setTypes(request.params);
 
 		return parameters.map((parameter: I.Parameter): any => {
 			if (parameter.param === "request") return this.getDescendantProp(request, parameter.key);
