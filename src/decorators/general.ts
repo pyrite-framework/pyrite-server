@@ -3,12 +3,12 @@ import * as I from "../interfaces";
 export function Route(path?: any, alias?: string): any {
 	if (typeof path === "string") {
 		return function(target: any, method: string, descriptor: PropertyDescriptor): void {
-			target.prototype.path = alias ? "/" + alias : path;
+			target.prototype.path = alias ? `/${alias}` : path;
 			target.prototype.alias = alias || target.name;
 		}
 	}
 
-	path.prototype.path = "/" + path.name;
+	path.prototype.path = `/${path.name}`;
 	path.prototype.alias = path.name;
 }
 

@@ -99,7 +99,9 @@ export class Server {
 			validations: route.targetMethod.validations
 		};
 
-		(<any>this.app)[route.method.action](route.target.path + route.targetMethod.path, ...route.befores);
+		const url = route.target.path + route.targetMethod.path;
+
+		(<any>this.app)[route.method.action](url, ...route.befores);
 	}
 
 	private loadEmitters(server: any): void {

@@ -1,4 +1,4 @@
-import { Application } from "express";
+import { Application, Request, Response } from "express";
 
 export interface ServerConfig {
 	(app: Application): void;
@@ -13,7 +13,7 @@ export interface ServerParams {
 };
 
 export interface Middleware {
-	(req: any, res: any, next: Function): void;
+	(request: Request, response: Response, next?: (error?: any) => void): void;
 };
 
 export interface Parameter {

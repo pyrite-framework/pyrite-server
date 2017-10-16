@@ -1,4 +1,5 @@
 import * as I from "./interfaces";
+import { Request, Response } from "express";
 
 export class Route {
 	emitCallback: Function;
@@ -11,7 +12,7 @@ export class Route {
 		public method: I.RouteConfig
 	) {
 		this.targetMethod = target[method.methodName];
-		this.targetMethod.path = method.path || "/" + this.targetMethod.name;
+		this.targetMethod.path = method.path || `/${this.targetMethod.name}`;
 		this.targetMethod.alias = this.targetMethod.alias || this.targetMethod.name;
 
 		console.log(`Loading route: ${method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
@@ -21,10 +22,10 @@ export class Route {
 		this.befores.push(this.mainMiddleware.bind(this));
 	}
 
-	private loadMiddlewarePlugins(req: any, res: any): Boolean {
+	private loadMiddlewarePlugins(request: Request, response: Response): Boolean {
 		return this.server.plugins
 			.filter((plugin: any) => plugin.type === "middleware")
-			.some((plugin: any): any => plugin.run(req, res, this.target, this.method.methodName));
+			.some((plugin: any): any => plugin.run(request, response, this.target, this.method.methodName));
 	}
 
 	private addBeforeMiddlewares(): Array<I.Middleware> {
@@ -42,13 +43,13 @@ export class Route {
 		return this.targetMethod.after.reduce((prev: Function, next: Function) => next(prev), result);
 	}
 
-	private mainMiddleware(req: any, res: any): void {
-		const failSome = this.loadMiddlewarePlugins(req, res);
+	private mainMiddleware(request: Request, response: Response): void {
+		const failSome = this.loadMiddlewarePlugins(request, response);
 		if (failSome) return;
 
-		let parameters: Array<any> = this.getOrder(req, res);
+		let parameters: Array<any> = this.getOrder(request, response);
 
-		console.log(`${this.method.action.toUpperCase()} ${this.target.path + this.targetMethod.path}`);
+		console.log(`${this.method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
 		let result = this.targetMethod(...parameters);
 
@@ -57,12 +58,12 @@ export class Route {
 		if (!result || typeof result.then !== "function") result = Promise.resolve(result);
 
 		result.then((methodResult: any) => {
-			if (methodResult.error && methodResult.status) return res.status(methodResult.status).send({ error: methodResult.error });
-			res.status(this.targetMethod.status || 200).send(methodResult);
+			if (methodResult.error && methodResult.status) return response.status(methodResult.status).send({ error: methodResult.error });
+			response.status(this.targetMethod.status || 200).send(methodResult);
 		})
 		.catch((error: any) => {
 			console.log(error);
-			res.status(500).send(error);
+			response.status(500).send(error);
 		});
 	}
 
@@ -82,7 +83,7 @@ export class Route {
 		return parameters;
 	}
 
-	private getOrder(request: any, response: any): Array<any> {
+	private getOrder(request: Request, response: Response): Array<any> {
 		const parameters = this.targetMethod.parameters;
 
 		if (!parameters) return [request, response];
@@ -98,7 +99,7 @@ export class Route {
 		});
 	}
 
-	private getDescendantProp(obj: any, desc: string | void): any {
+	private getDescendantProp(obj: any, desc?: string): any {
 		if (!desc) return obj;
 
 		const arr = desc.split(".");
