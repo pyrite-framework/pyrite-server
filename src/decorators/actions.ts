@@ -22,7 +22,7 @@ export function Head(path: any, ...types: Array<any>): any {
 
 function handler(action: string, path: any, types: Array<any>): any {
 	if (typeof path === "string") {
-		return function(target: any, method: string, descriptor: PropertyDescriptor): any {
+		return function(target: any, method: string, descriptor: PropertyDescriptor): void {
 			addRoute(target, method, action, types, path);
 		}
 	}
@@ -30,7 +30,7 @@ function handler(action: string, path: any, types: Array<any>): any {
 	addRoute(path, types[0], action);
 }
 
-function addRoute(target: any, methodName: string, action: string, types: Array<any> = [], path: string|null = null) {
+function addRoute(target: any, methodName: string, action: string, types: Array<any> = [], path: string|null = null): any {
 	if (!target.routes) target.routes = [];
 
 	const params: I.RouteConfig = {

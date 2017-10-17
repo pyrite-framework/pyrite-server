@@ -1,15 +1,16 @@
 {
   "name": "pyrite-server",
   "description": "Pyrite Server",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Fabio Garcia",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -w",
+    "build": "tsc",
+    "build:watch": "tsc -w",
     "start": "nodemon lib/example",
-    "watch": "concurrently --kill-others \"npm run build\" \"npm run start\""
+    "watch": "concurrently --kill-others \"npm run build:watch\" \"npm run start\""
   },
   "dependencies": {
     "@types/body-parser": "0.0.33",

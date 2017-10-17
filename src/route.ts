@@ -1,10 +1,14 @@
-import * as I from "./interfaces";
 import { Request, Response } from "express";
 
+import { Plugins } from "./plugins";
+
+import * as I from "./interfaces";
+
 export class Route {
-	emitCallback: Function;
+	pluginCallbacks: {[key: string]: Function};
 	targetMethod: I.Method;
 	befores: Array<I.Middleware>;
+	plugins: Plugins;
 
 	constructor(
 		private server: any,
@@ -14,18 +18,13 @@ export class Route {
 		this.targetMethod = target[method.methodName];
 		this.targetMethod.path = method.path || `/${this.targetMethod.name}`;
 		this.targetMethod.alias = this.targetMethod.alias || this.targetMethod.name;
+		this.plugins = server.plugins;
 
 		console.log(`Loading route: ${method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
 		this.befores = this.addBeforeMiddlewares();
 
 		this.befores.push(this.mainMiddleware.bind(this));
-	}
-
-	private loadMiddlewarePlugins(request: Request, response: Response): Boolean {
-		return this.server.plugins
-			.filter((plugin: any) => plugin.type === "middleware")
-			.some((plugin: any): any => plugin.run(request, response, this.target, this.method.methodName));
 	}
 
 	private addBeforeMiddlewares(): Array<I.Middleware> {
@@ -44,7 +43,7 @@ export class Route {
 	}
 
 	private mainMiddleware(request: Request, response: Response): void {
-		const failSome = this.loadMiddlewarePlugins(request, response);
+		const failSome = this.plugins.runMiddlewares(request, response, this);
 		if (failSome) return;
 
 		let parameters: Array<any> = this.getOrder(request, response);
@@ -67,7 +66,7 @@ export class Route {
 		});
 	}
 
-	private setTypes(parameters: any): Array<any> {
+	private setTypes(parameters: any): Array<I.Parameter> {
 		const routes = this.targetMethod.path.split("/");
 
 		let paramNumber = 0;
@@ -90,10 +89,12 @@ export class Route {
 		if (this.method.types.length) this.setTypes(request.params);
 
 		return parameters.map((parameter: I.Parameter): any => {
+			const plugin = this.plugins.getByParameter(parameter.param);
+
 			if (parameter.param === "request") return this.getDescendantProp(request, parameter.key);
-			else if (parameter.param === "response") return this.getDescendantProp(response, parameter.key);
-			else if (parameter.param === "emit") return this.emitCallback.bind(this, request.headers["pyrite-token"], request.headers["pyrite-id"]);
-			else if (parameter.key) return this.getDescendantProp((<any>request)[parameter.param], parameter.key);
+			if (parameter.param === "response") return this.getDescendantProp(response, parameter.key);
+			if (parameter.key) return this.getDescendantProp((<any>request)[parameter.param], parameter.key);
+			if (plugin) return this.pluginCallbacks[plugin.name].bind(this, request, response);
 
 			return (<any>request)[parameter.param];
 		});

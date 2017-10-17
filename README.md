@@ -13,9 +13,9 @@ npm install pyrite-server
 ### main.js
 
 ```typescript
-import { Server } from "pyrite-server";
+import { PyriteServer } from "pyrite-server";
 
-const server = new Server({
+const server = new PyriteServer({
   port: 8000,
   routes: "/routes"
 });

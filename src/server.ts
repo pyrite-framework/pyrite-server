@@ -6,16 +6,24 @@ import * as path from "path";
 import * as cors from "cors";
 
 import { Route } from "./route";
+import { Plugins } from "./plugins";
+
 import * as I from "./interfaces";
 
-export class Server {
+export class PyriteServer {
 	private app: express.Application;
 	private controllersAllowed: any = {};
-	private plugins: Array<any> = [];
+	private plugins: Plugins|void;
+	private connection: any;
 
 	constructor(private params: I.ServerParams) {
-		if (params.plugins) this.plugins = params.plugins;
+		if (params.plugins) this.plugins = new Plugins(this, params.plugins);
 		if (params.config) this.config(params.config);
+
+		this.loadExpress();
+		this.loadRouteFolders();
+		this.loadConnect();
+		this.configCallback();
 	}
 
 	private loadExpress(): void {
@@ -26,12 +34,10 @@ export class Server {
 		this.app.use(this.bodyParserError);
 		this.app.use(cookieParser());
 
-		if (this.params.cors) {
-			this.app.use(cors({
-				origin: this.params.cors
-			}));
-		}
+		if (this.params.cors) this.app.use(cors({ origin: this.params.cors }));
 	}
+
+	private configCallback(): void {}
 
 	private bodyParserError(error: any, req: any, res: any, next: Function) {
 		if (!(error instanceof SyntaxError)) next();
@@ -66,10 +72,10 @@ export class Server {
 		});
 	}
 
-	private loadRoute(route: any) {
+	private loadRoute(route: any): void {
 		const routeControllers = Object.keys(route);
 
-		routeControllers.forEach((routeKey) => {
+		routeControllers.forEach((routeKey: string) => {
 			const routeController = route[routeKey];
 
 			if (!routeController.prototype.routes) return;
@@ -82,48 +88,44 @@ export class Server {
 				const routeInstance = new Route(this, instance, method);
 
 				this.addRouteMiddleware(routeInstance);
-				this.loadMiddlewareEmitter(routeInstance);
+				if (this.plugins) this.plugins.load(routeInstance);
 			});
 		});
 	}
 
-	private loadMiddlewareEmitter(route: Route): void {
-		const emitter = this.plugins.find((plugin: any) => plugin.type === "emitter");
-		if (emitter) route.emitCallback = emitter.loadEmit(route.target, route.method);
+	private loadConnect(): void {
+		this.app.get("/", (req: express.Request, res: express.Response) => {
+			res.send(this.controllersAllowed);
+		});
 	}
 
-	private addRouteMiddleware(route: Route) {
-		this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
+	private addRouteMiddleware(route: Route): void {
+		const configParam = this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
 			url: route.target.path + (route.targetMethod.path),
-			action: route.method.action.toUpperCase(),
-			validations: route.targetMethod.validations
+			action: route.method.action.toUpperCase()
 		};
+
+		if (this.plugins) {
+			const plugins = this.plugins.getByType("middleware");
+
+			plugins.forEach((plugin: I.Plugin) => {
+				if (plugin.add) plugin.add(configParam);
+			});
+		}
 
 		const url = route.target.path + route.targetMethod.path;
 
 		(<any>this.app)[route.method.action](url, ...route.befores);
 	}
 
-	private loadEmitters(server: any): void {
-		const emitter = this.plugins.find((plugin: any) => plugin.type === "emitter");
-
-		if (emitter) emitter.run(Server, server);
-	}
-
-	private configCallback(): void {}
-
-	public config(callbackConfig: I.ServerConfig) {
+	public config(callbackConfig: I.ServerConfig): PyriteServer {
 		this.configCallback = callbackConfig.bind(this, this.app);
 		return this;
 	}
 
 	public listen(callbackListen: Function): void {
-		this.loadExpress();
-		this.loadRouteFolders();
-		this.configCallback();
-
-		const server = this.app.listen(this.params.port, () => {
-			this.loadEmitters(server);
+		this.connection = this.app.listen(this.params.port, () => {
+			if (this.plugins) this.plugins.run();
 			callbackListen();
 		});
 	}

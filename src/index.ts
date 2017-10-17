@@ -10,4 +10,4 @@ export {
 	Request, Response, Headers, Cookies, Session, Query, Params, Body
 } from "./decorators/parameters";
 
-export { Server } from "./server";
+export { PyriteServer } from "./server";
