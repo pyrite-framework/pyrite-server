@@ -19,6 +19,7 @@ export class Route {
 		this.targetMethod.path = method.path || `/${this.targetMethod.name}`;
 		this.targetMethod.alias = this.targetMethod.alias || this.targetMethod.name;
 		this.plugins = server.plugins;
+		this.pluginCallbacks = {};
 
 		console.log(`Loading route: ${method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
