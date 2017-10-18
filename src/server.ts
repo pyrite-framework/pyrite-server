@@ -109,7 +109,7 @@ export class PyriteServer {
 			const plugins = this.plugins.getByType("middleware");
 
 			plugins.forEach((plugin: I.Plugin) => {
-				if (plugin.add) plugin.add(configParam);
+				if (plugin.add) plugin.add(configParam, route);
 			});
 		}
 

@@ -49,7 +49,7 @@ export interface Plugin {
 	run(server: any): void;
 	run(request: Request, response: Response, route: Route): boolean;
 	load(target: any, method: RouteConfig): Function;
-	add(configParam: ConfigParam): void;
+	add(configParam: ConfigParam, route: Route): void;
 	name: string;
 	type: string;
 	param: string;

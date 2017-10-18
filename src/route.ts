@@ -94,7 +94,7 @@ export class Route {
 			if (parameter.param === "request") return this.getDescendantProp(request, parameter.key);
 			if (parameter.param === "response") return this.getDescendantProp(response, parameter.key);
 			if (parameter.key) return this.getDescendantProp((<any>request)[parameter.param], parameter.key);
-			if (plugin) return this.pluginCallbacks[plugin.name].bind(this, request, response);
+			if (plugin) return this.pluginCallbacks[plugin.param].bind(this, request, response);
 
 			return (<any>request)[parameter.param];
 		});

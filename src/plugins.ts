@@ -9,15 +9,15 @@ export class Plugins {
 	constructor(private server: PyriteServer, private plugins: Array<I.Plugin>) {}
 
 	public load(route: Route): void {
-		const plugins = this.plugins.filter((plugin: I.Plugin) => plugin.type === "server");
+		const plugins = this.getByType("server");
 
 		plugins.forEach((plugin: I.Plugin) => {
-			route.pluginCallbacks[plugin.name] = plugin.load(route.target, route.method);
+			route.pluginCallbacks[plugin.param] = plugin.load(route.target, route.method);
 		});
 	}
 
 	public run(): void {
-		const plugins = this.plugins.filter((plugin: any) => plugin.type === "server");
+		const plugins = this.getByType("server");
 
 		plugins.forEach((plugin: I.Plugin) => {
 			plugin.run(this.server);
