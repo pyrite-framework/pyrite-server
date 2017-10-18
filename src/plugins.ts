@@ -25,8 +25,11 @@ export class Plugins {
 	}
 
 	public runMiddlewares(request: Request, response: Response, route: Route): Boolean {
-		return this.getByType("middleware")
-		.some((plugin: I.Plugin): boolean => plugin.run(request, response, route));
+		const middlewares = this.getByType("middleware");
+
+		if (!middlewares) return true;
+
+		return middlewares.some((plugin: I.Plugin): boolean => plugin.run(request, response, route));
 	}
 
 	public getByType(type: string) {
