@@ -8,7 +8,7 @@ export class Route {
 	pluginCallbacks: {[key: string]: Function};
 	targetMethod: I.Method;
 	befores: Array<I.Middleware>;
-	plugins: Plugins;
+	plugins: Plugins|void;
 
 	constructor(
 		private server: any,
@@ -44,8 +44,7 @@ export class Route {
 	}
 
 	private mainMiddleware(request: Request, response: Response): void {
-		const failSome = this.plugins.runMiddlewares(request, response, this);
-		if (failSome) return;
+		if (this.plugins && this.plugins.runMiddlewares(request, response, this)) return;
 
 		let parameters: Array<any> = this.getOrder(request, response);
 
@@ -90,7 +89,7 @@ export class Route {
 		if (this.method.types.length) this.setTypes(request.params);
 
 		return parameters.map((parameter: I.Parameter): any => {
-			const plugin = this.plugins.getByParameter(parameter.param);
+			const plugin = this.plugins ? this.plugins.getByParameter(parameter.param) : false;
 
 			if (parameter.param === "request") return this.getDescendantProp(request, parameter.key);
 			if (parameter.param === "response") return this.getDescendantProp(response, parameter.key);

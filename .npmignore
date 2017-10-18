@@ -2,3 +2,4 @@
 /example
 lib/example
 lib/**/*.map
+npm-debug.log
