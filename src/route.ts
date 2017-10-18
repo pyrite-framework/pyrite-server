@@ -50,13 +50,11 @@ export class Route {
 
 		console.log(`${this.method.action.toUpperCase()} ${this.target.path}${this.targetMethod.path}`);
 
-		let result = this.targetMethod(...parameters);
-
-		result = this.addAfterMiddlewares(result);
-
-		if (!result || typeof result.then !== "function") result = Promise.resolve(result);
-
-		result.then((methodResult: any) => {
+		new Promise((resolve) => {
+			resolve(this.targetMethod.call(this.target, ...parameters));
+		})
+		.then(this.addAfterMiddlewares.bind(this))
+		.then((methodResult: any) => {
 			if (methodResult.error && methodResult.status) return response.status(methodResult.status).send({ error: methodResult.error });
 			response.status(this.targetMethod.status || 200).send(methodResult);
 		})
