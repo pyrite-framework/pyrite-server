@@ -1,13 +1,13 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
-    "strict": true,
-    "sourceMap": true,
-    "rootDir": ".",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "outDir": "./lib",
-    "declaration": true
-  }
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es6",
+		"strict": true,
+		"sourceMap": true,
+		"rootDir": ".",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"outDir": "./lib",
+		"declaration": true
+	}
 }
