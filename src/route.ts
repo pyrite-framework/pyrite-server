@@ -59,8 +59,8 @@ export class Route {
 			response.status(this.targetMethod.status || 200).send(methodResult);
 		})
 		.catch((error: any) => {
-			console.log(error);
-			response.status(500).send(error);
+			console.error(error);
+			response.status(error.status || 500).send(error ? error.error : error);
 		});
 	}
 
