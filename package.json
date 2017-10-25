@@ -1,7 +1,7 @@
 {
 	"name": "pyrite-server",
 	"description": "Pyrite Server",
-	"version": "0.4.8",
+	"version": "0.5.0",
 	"author": "Fabio Garcia",
 	"main": "lib/src/index.js",
 	"types": "lib/src/index.d.ts",

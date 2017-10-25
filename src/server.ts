@@ -102,7 +102,8 @@ export class PyriteServer {
 	private addRouteMiddleware(route: Route): void {
 		const configParam = this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
 			url: route.target.path + (route.targetMethod.path),
-			action: route.method.action.toUpperCase()
+			action: route.method.action.toUpperCase(),
+			params: route.targetMethod.parameters
 		};
 
 		if (this.plugins) {
