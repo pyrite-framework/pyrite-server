@@ -55,7 +55,7 @@ export class Route {
 		})
 		.then(this.addAfterMiddlewares.bind(this))
 		.then((methodResult: any) => {
-			if (methodResult.error && methodResult.status) return response.status(methodResult.status).send({ error: methodResult.error });
+			if (methodResult && methodResult.error && methodResult.status) return response.status(methodResult.status).send({ error: methodResult.error });
 			response.status(this.targetMethod.status || 200).send(methodResult);
 		})
 		.catch((error: any) => {
