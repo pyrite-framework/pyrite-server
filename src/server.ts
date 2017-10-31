@@ -100,11 +100,13 @@ export class PyriteServer {
 	}
 
 	private addRouteMiddleware(route: Route): void {
-		const configParam = this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
+		const configParam: any = this.controllersAllowed[route.target.alias][route.targetMethod.alias] = {
 			url: route.target.path + (route.targetMethod.path),
 			action: route.method.action.toUpperCase(),
 			params: route.targetMethod.parameters
 		};
+
+		this.setStorage(route, configParam);
 
 		if (this.plugins) {
 			const plugins = this.plugins.getByType("middleware");
@@ -117,6 +119,12 @@ export class PyriteServer {
 		const url = route.target.path + route.targetMethod.path;
 
 		(<any>this.app)[route.method.action](url, ...route.befores);
+	}
+
+	private setStorage(route: Route, configParam: any) {
+		if (route.target.storage || route.targetMethod.storage) configParam.storage = [];
+		if (route.target.storage) configParam.storage = configParam.storage.concat(route.target.storage);
+		if (route.targetMethod.storage) configParam.storage = configParam.storage.concat(route.targetMethod.storage);
 	}
 
 	public config(callbackConfig: I.ServerConfig): PyriteServer {

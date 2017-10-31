@@ -3,7 +3,7 @@ export {
 } from "./decorators/actions";
 
 export {
-	Route, Alias, Status, Before, After, Exception
+	Route, Alias, Status, Before, After, Exception, Storage
 } from "./decorators/general";
 
 export {

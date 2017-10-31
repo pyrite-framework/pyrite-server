@@ -12,6 +12,26 @@ export function Route(path?: any, alias?: string): any {
 	path.prototype.alias = path.name;
 }
 
+export function Storage(headerKey: any, storageKey?: string): any {
+	return function(target: any, method: string, descriptor: PropertyDescriptor): void {
+		const storage = {
+			remote: headerKey,
+			local: storageKey || headerKey
+		};
+
+		if (!method) {
+			if (!target.prototype.storage) target.prototype.storage = [];
+			target.prototype.storage.push(storage);
+
+			return target;
+		}
+
+		if (!target[method].storage) target[method].storage = [];
+
+		target[method].storage.push(storage);
+	}
+}
+
 export function Alias(name: string): Function {
 	return function(target: any, method: string, descriptor: PropertyDescriptor): void {
 		target[method].alias = name;
@@ -26,10 +46,8 @@ export function Status(status: number): Function {
 
 export function Before(middleware: I.Middleware): Function {
 	return function(target: any, method: string, descriptor: PropertyDescriptor): void {
-		let befores = [];
-
 		if (!method) {
-			if (!target.prototype.beforeAll) befores = target.prototype.beforeAll = [];
+			if (!target.prototype.beforeAll) target.prototype.beforeAll = [];
 			target.prototype.beforeAll.unshift(middleware);
 			return target;
 		}

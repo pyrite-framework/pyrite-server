@@ -43,6 +43,7 @@ export interface Method {
 	path: string;
 	alias: string;
 	name: string;
+	storage: Array<any>;
 }
 
 export interface Plugin {
