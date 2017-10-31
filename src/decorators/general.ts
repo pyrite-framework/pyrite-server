@@ -16,7 +16,7 @@ export function Storage(headerKey: any, storageKey?: string): any {
 	return function(target: any, method: string, descriptor: PropertyDescriptor): void {
 		const storage = {
 			remote: headerKey,
-			local: storageKey || headerKey
+			local: storageKey
 		};
 
 		if (!method) {
